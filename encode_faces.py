@@ -3,7 +3,7 @@ import argparse
 import pickle
 import cv2
 import os
-import logging
+from tqdm import tqdm
 
 from imutils import paths
 
@@ -17,16 +17,15 @@ ap.add_argument("-d", "--detection-method", type=str, default="cnn",
 args = vars(ap.parse_args())
 
 # grab the paths to the input images in our dataset
-logging.info('quantifying faces...')
+print('[INFO] quantifying faces...')
 imagePaths = list(paths.list_images(args["dataset"]))
 # initialize the list of known encodings and known names
 knownEncodings = []
 knownNames = []
 
 # loop over the image paths
-for i, imagePath in enumerate(imagePaths):
+for i, imagePath in tqdm(enumerate(imagePaths), total=len(imagePaths), desc='Processing images'):
     # extract the person name from the image path
-    logging.info(f'processing image {i+1}/{len(imagePaths)}')
     name = imagePath.split(os.path.sep)[-2]
 
     # load the input image and convert it from BGR (OpenCV ordering)
@@ -47,3 +46,10 @@ for i, imagePath in enumerate(imagePaths):
         # add each encoding + name to our set of known names and encodings
         knownEncodings.append(encoding)
         knownNames.append(name)
+
+# dump the facial encodings + names to disk
+print("[INFO] serializing encodings...")
+data = {"encodings": knownEncodings, "names": knownNames}
+f = open(args["encodings"], "wb")
+f.write(pickle.dumps(data))
+f.close()
