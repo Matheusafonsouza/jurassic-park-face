@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# things that i add (matheus)
+*.pickle
+
 # C extensions
 *.so
 
